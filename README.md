@@ -1,28 +1,64 @@
-# Sistema di Gestione degli Interventi di Manutenzione in un Condominio
+#  Sistema di Gestione Manutenzioni Condominiali
 
-Progetto per l'esame di Programmazione e Strutture Dati - A.A. 2025/2026 (Traccia 1).
+> **Progetto per l'esame di Programmazione e Strutture Dati**
+> *A.A. 2025/2026 (Traccia 1)*
 
-**Team di Sviluppo:**
-* Joshua Sarnelli
-* Sabato Pio 
-* Raffaele Pio Villani
+![C](https://img.shields.io/badge/Language-C99-blue.svg)
+![Build](https://img.shields.io/badge/Build-Makefile-orange.svg)
+![Platform](https://img.shields.io/badge/Platform-Cross--Platform-lightgrey.svg)
 
-## Descrizione del Sistema
-Il programma, scritto in C Standard (C99), gestisce gli interventi di manutenzione di un condominio. Permette di registrare nuove richieste, gestire l'anagrafica dei tecnici, pianificare gli interventi (con verifica dei conflitti orari) e generare report.
+Il sistema offre una soluzione software completa per la gestione degli interventi tecnici in un condominio. Implementato interamente in **C Standard**, il programma si focalizza sull'efficienza delle strutture dati per la gestione di anagrafiche, pianificazione temporale e risoluzione dei conflitti.
 
-## Piattaforma e Prerequisiti
-* **Compilatore:** GCC compatibile con standard C89/C99
-* **Tool di build:** Make
+---
 
-## Istruzioni di Compilazione e Avvio
-Il progetto utilizza un `Makefile` per automatizzare il processo di build e testing. Dalla root directory del progetto, aprire il terminale ed eseguire i seguenti comandi:
+## 👥 Team di Sviluppo
+* **Joshua Sarnelli**
+* **Sabato Pio**
+* **Raffaele Pio Villani**
 
-**1. Compilazione del programma principale:**
+---
+
+## 🛠️ Funzionalità Core
+* 📝 **Gestione Richieste:** Registrazione e archiviazione delle segnalazioni.
+* 👨‍🔧 **Anagrafica Tecnici:** Gestione completa del database operatori.
+* 📅 **Planning Intelligente:** Algoritmo di verifica conflitti orari per gli interventi.
+* 📊 **Reporting:** Generazione automatica di report sull'attività manutentiva.
+
+---
+
+## 🚀 Guida Rapida
+
+### Prerequisiti
+Assicurati di avere installato un compilatore **GCC** e l'utility **Make**.
+
+### Compilazione e Avvio
+Dalla cartella principale del progetto, apri il terminale ed esegui:
+
 ```bash
-make all 
+make all
+```
 
-#! NOTA PER GLI UTENTI WINDOWS
+> [!TIP]
+> **Nota per utenti Windows**
+> Se utilizzi un ambiente Windows (MinGW, PowerShell o IDE specifici) e il comando `make` non viene riconosciuto, utilizza invece:
+> ```bash
+> mingw32-make
+> ```
 
-Il comando "make all" potrebbe non funzionare nel proprio IDE, usare in cambio:
+---
 
-mingw32-make
+## 📁 Struttura del Repository
+
+| Cartella | Descrizione |
+| :--- | :--- |
+| `src/` | File sorgente (.c) |
+| `include/` | Header file (.h) |
+| `obj/` | File oggetto generati durante la compilazione |
+| `bin/` | Eseguibile finale |
+
+---
+
+## 🛠 Specifiche Tecniche
+* **Linguaggio:** C (Standard C89/C99)
+* **Gestione Dati:** Strutture dati dinamiche per l'ottimizzazione della memoria.
+* **Build System:** `Makefile` per l'automazione della compilazione.
