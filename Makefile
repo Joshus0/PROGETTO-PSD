@@ -1,31 +1,39 @@
 # Compilatore e Flag (Standard C89 e avvertimenti attivati)
 CC = gcc
-CFLAGS = -ansi -Wall -Wextra -Iinclude
+CFLAGS = -std=c99 -Wall -Wextra -Iinclude
 
 # --- RILEVAMENTO UNIVERSALE DEL SISTEMA OPERATIVO ---
 ifeq ($(OS),Windows_NT)
-    # Impostazioni se il PC è Windows
-    TARGET = condominio.exe
-    CLEAN_CMD = cmd /C del /Q /F $(TARGET)
+	TARGET = condominio.exe
+	TEST_TARGET = test_condominio.exe
+	CLEAN_CMD = cmd /C del /Q /F $(TARGET) $(TEST_TARGET)
 else
-    # Impostazioni se il PC è Mac o Linux
-    TARGET = condominio
-    CLEAN_CMD = rm -f $(TARGET)
+	TARGET = condominio
+	TEST_TARGET = test_condominio
+	CLEAN_CMD = rm -f $(TARGET) $(TEST_TARGET)
 endif
 # ----------------------------------------------------
 
-# Target principale: compila tutto quello che trova in src/
-all:
-	$(CC) $(CFLAGS) src/*.c -o $(TARGET)
+# --- DEFINIZIONE ESPLICITA DEI FILE ---
+# In CORE_SRCS mettiamo tutti i moduli che servono a entrambi.
+CORE_SRCS = src/interventi.c src/gestione_file.c
+MAIN_SRC = src/main.c
+TEST_SRC = src/main_test.c
 
-# Esegue il programma dopo averlo compilato (usa ./ per compatibilità Mac/Linux)
+# Target principale: compila solo il programma base
+all:
+	$(CC) $(CFLAGS) $(MAIN_SRC) $(CORE_SRCS) -o $(TARGET)
+
+# Esegue il programma principale
 run: all
 	./$(TARGET)
 
-# Pulisce la cartella. Il trattino iniziale '-' significa "ignora gli errori"
+# --- TARGET PER I TEST ---
+# Compila usando main_test.c invece di main.c, poi lo esegue automaticamente
+test:
+	$(CC) $(CFLAGS) $(TEST_SRC) $(CORE_SRCS) -o $(TEST_TARGET)
+	./$(TEST_TARGET)
+
+# Pulisce la cartella da entrambi gli eseguibili
 clean:
 	-$(CLEAN_CMD)
-
-# Target per i test
-test:
-	@echo "Esecuzione dei test non ancora configurata"

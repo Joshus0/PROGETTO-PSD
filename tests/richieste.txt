@@ -1,0 +1,5 @@
+4;Scala A Int 3;Idraulico;Tubo rotto con allagamento in corso;15/05/2026
+2;Scala B Int 5;Elettricista;Presa bruciata in cucina;16/05/2026
+3;Androne Principale;Muratore;Intonaco pericolante dal soffitto;17/05/2026
+0;Box Auto 12;Elettricista;Sostituzione plafoniera fulminata;18/05/2026
+1;Cancello Esterno;Fabbro;Serratura che si incastra;19/05/2026

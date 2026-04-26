@@ -1,0 +1,4 @@
+101;Mario Rossi;Idraulico
+102;Luigi Verdi;Elettricista
+103;Anna Bianchi;Muratore
+104;Gennaro Esposito;Fabbro
