@@ -55,6 +55,7 @@ make all
 | `include/` | Header file (.h) |
 | `obj/` | File oggetto generati durante la compilazione |
 | `bin/` | Eseguibile finale |
+| `tests/` | File di test |
 
 ---
 
