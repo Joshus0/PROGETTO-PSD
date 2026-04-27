@@ -120,6 +120,36 @@ int getCaricoLavoro(NodoTecnico* t) {
 }
 //------------------------------------------------------------------------------------
 
+//Cerca una richiesta per codice analizzando ogni livello di urgenza
+
+NodoRichiesta* trovaRichiestaPerCodice(NodoRichiesta* code[], int codice) {
+    int indiceUrgenza;
+    NodoRichiesta* nodoCorrente;
+
+    /* Scorriamo tutti i livelli, partendo dall'urgenza 0 fino a LIVELLI_URGENZA-1 */
+    for (indiceUrgenza = 0; indiceUrgenza < LIVELLI_URGENZA; indiceUrgenza++) {
+        
+        /* Impostiamo il nodo corrente alla testa della coda specifica */
+        nodoCorrente = code[indiceUrgenza];
+        
+        /* Scorriamo l'intera coda finché non troviamo la fine (NULL) */
+        while (nodoCorrente != NULL) {
+            
+            /* Se il codice corrisponde a quello cercato, fermiamo tutto e restituiamo il nodo */
+            if (nodoCorrente->codiceRichiesta == codice) {
+                return nodoCorrente; 
+            }
+            
+            /* Altrimenti, passiamo al nodo successivo nella coda */
+            nodoCorrente = nodoCorrente->next; 
+        }
+    }
+    
+    /* Se i cicli finiscono e non abbiamo trovato nulla, la richiesta non esiste */
+    return NULL; 
+}
+//------------------------------------------------------------------------------------
+
 
 int verificaConflitto(NodoTecnico* t, char* data, int fasciaOraria) {
     NodoAgenda* curr;
