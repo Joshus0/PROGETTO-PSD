@@ -4,9 +4,9 @@ CFLAGS = -std=c99 -Wall -Wextra -Iinclude
 
 # --- RILEVAMENTO UNIVERSALE DEL SISTEMA OPERATIVO ---
 ifeq ($(OS),Windows_NT)
-	TARGET = condominio.exe
-	TEST_TARGET = test_condominio.exe
-	CLEAN_CMD = cmd /C del /Q /F $(TARGET) $(TEST_TARGET)
+    TARGET = condominio.exe
+    TEST_TARGET = test_condominio.exe
+    CLEAN_CMD = powershell -Command "Remove-Item -Force *.exe -ErrorAction Ignore"
 else
 	TARGET = condominio
 	TEST_TARGET = test_condominio
@@ -18,7 +18,7 @@ endif
 # In CORE_SRCS mettiamo tutti i moduli che servono a entrambi.
 CORE_SRCS = src/interventi.c src/gestione_file.c
 MAIN_SRC = src/main.c
-TEST_SRC = src/main_test.c
+TEST_SRC = tests/main_test.c
 
 # Target principale: compila solo il programma base
 all:
