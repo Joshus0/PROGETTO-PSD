@@ -36,6 +36,8 @@ int main() {
         printf("1. Inserisci Nuova Richiesta\n");
         printf("2. Visualizza Dati in Memoria (Test Lettura)\n");
         printf("3. Prova Assegnazione Manuale (Test Conflitti)\n");
+        printf("4. Assegna Richiesta a Tecnico\n");
+        printf("5. Aggiorna Stato Richiesta\n");
         printf("0. Esci dal Programma\n");
         printf("Seleziona un'opzione: ");
 
@@ -107,6 +109,67 @@ int main() {
                     printf("\n[BLOCCATO] Conflitto rilevato! Il tecnico e' gia' occupato in quella data e fascia oraria.\n");
                 }
                 break;
+
+
+            case 4:
+                printf("\n-- ASSEGNAZIONE RICHIESTA --\n");
+                printf("Codice richiesta da assegnare: ");
+                {
+                int codiceReq;
+                scanf("%d", &codiceReq);
+                pulisciBuffer();
+
+                printf("Data intervento (DD/MM/YYYY): ");
+                fgets(bufferData, 11, stdin);
+                bufferData[strcspn(bufferData, "\n")] = 0;
+
+                printf("Fascia oraria (1=Mattina, 2=Pomeriggio, 3=Sera): ");
+                scanf("%d", &fascia);
+                pulisciBuffer();
+
+                if (assegnaRichiesta(codeRichieste, listaTecnici, codiceReq, bufferData, fascia) == 1) {
+                    printf("\n[OK] Tecnico compatibile trovato e intervento pianificato.\n");
+                } else {
+                    printf("\n[ERRORE] Nessun tecnico compatibile disponibile o conflitto orario.\n");
+                }
+                break;
+                }
+
+            case 5:
+                printf("\n-- AGGIORNAMENTO STATO RICHIESTA --\n");
+                printf("Codice richiesta: ");
+                {
+                int codiceUpd;
+                scanf("%d", &codiceUpd);
+                pulisciBuffer();
+
+                NodoRichiesta* reqDaAggiornare = trovaRichiestaPerCodice(codeRichieste, codiceUpd);
+                if (reqDaAggiornare == NULL) {
+                    printf("\n[ERRORE] Richiesta non trovata.\n");
+                    break;
+                }
+                printf("Nuovo stato (0=Aperta, 1=Pianificata, 2=InLavorazione, 3=Conclusa, 4=Annullata): ");
+                int nuovoStato;
+                scanf("%d", &nuovoStato);
+                pulisciBuffer();
+
+                if (nuovoStato < 0 || nuovoStato > 4) {
+                    printf("\n[ERRORE] Stato non valido.\n");
+                    break;
+                }
+
+                setStatoRichiesta(reqDaAggiornare, (StatoRichiesta)nuovoStato);
+
+                if (nuovoStato == 3) { /* Conclusa */
+                    printf("Data di chiusura (DD/MM/YYYY): ");
+                    fgets(bufferData, 11, stdin);
+                    bufferData[strcspn(bufferData, "\n")] = 0;
+                setDataChiusura(reqDaAggiornare, bufferData);
+                }
+
+                printf("\n[OK] Stato aggiornato con successo.\n");
+                break;
+                }
 
             case 0:
                 printf("Uscita in corso... Arrivederci!\n");
