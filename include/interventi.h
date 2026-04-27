@@ -64,4 +64,24 @@ void stampaStatoGlobale(NodoRichiesta* code[], NodoTecnico* listaT);
 
 /* Post-condizione: Ritorna il puntatore al NodoRichiesta con il codice specificato, o NULL se non esiste */
 NodoRichiesta* trovaRichiestaPerCodice(NodoRichiesta* code[], int codice);
+
+
+/* Getter/Setter disponibilità */
+int getDisponibilitaTecnico(NodoTecnico* t);
+void setDisponibilitaTecnico(NodoTecnico* t, int disponibile);
+
+/* Getter next — necessari per traversal esterno senza violare information hiding */
+NodoRichiesta* getNextRichiesta(NodoRichiesta* req);
+NodoTecnico* getNextTecnico(NodoTecnico* t);
+
+/* Imposta la data di chiusura quando la richiesta diventa Conclusa */
+void setDataChiusura(NodoRichiesta* req, char* data);
+
+
+/* Assegna automaticamente un tecnico compatibile a una richiesta */
+/* Post-condizione: Output = 1 (successo: tecnico trovato, impegno aggiunto, stato -> Pianificata)
+                    oppure 0 (fallimento: richiesta non trovata, nessun tecnico compatibile/disponibile, conflitto) */
+int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codiceRichiesta, char* data, int fasciaOraria);
+
 #endif
+

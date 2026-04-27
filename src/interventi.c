@@ -18,6 +18,7 @@ struct NodoTecnico {               //? Profilo del tecnico
     char nome[MAX_STR];
     char specializzazione[MAX_STR];
     int caricoLavoro;
+    int disponibilita; /*1=disponibile, 0=non disponibile*/
     NodoAgenda* agenda;//Puntatore alla lista personale di impegni del tecnico
     struct NodoTecnico* next;
 };
@@ -77,6 +78,7 @@ void inserisciTecnico(NodoTecnico** testa, int id, char* nome, char* spec) {//Do
         nuovo->idTecnico = id;
         strcpy(nuovo->nome, nome);
         strcpy(nuovo->specializzazione, spec);
+        nuovo->disponibilita = 1; /* Di default un nuovo tecnico è disponibile */
         nuovo->caricoLavoro = 0;
         nuovo->agenda = NULL;
         
@@ -117,6 +119,31 @@ char* getNomeTecnico(NodoTecnico* t) {
 int getCaricoLavoro(NodoTecnico* t) {
     if (t != NULL) return t->caricoLavoro;
     return 0;
+}
+
+int getDisponibilitaTecnico(NodoTecnico* t) {
+    if (t != NULL) return t->disponibilita;
+    return 0;
+}
+
+void setDisponibilitaTecnico(NodoTecnico* t, int disponibile) {
+    if (t != NULL) t->disponibilita = disponibile;
+}
+
+NodoRichiesta* getNextRichiesta(NodoRichiesta* req) {
+    if (req != NULL) return req->next;
+    return NULL;
+}
+
+NodoTecnico* getNextTecnico(NodoTecnico* t) {
+    if (t != NULL) return t->next;
+    return NULL;
+}
+
+void setDataChiusura(NodoRichiesta* req, char* data) {
+    if (req != NULL && data != NULL) {
+        strcpy(req->dataChiusura, data);
+    }
 }
 //------------------------------------------------------------------------------------
 
@@ -166,6 +193,27 @@ int verificaConflitto(NodoTecnico* t, char* data, int fasciaOraria) {
     return 0; 
 }
 
+int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codiceRichiesta, char* data, int fasciaOraria) {
+    NodoRichiesta* req;
+    NodoTecnico* curr;
+
+    req = trovaRichiestaPerCodice(code, codiceRichiesta);
+    if (req == NULL) return 0;
+
+    /* Scorriamo i tecnici cercando uno compatibile e disponibile */
+    curr = listaTecnici;
+    while (curr != NULL) {
+        if (strcmp(curr->specializzazione, req->tipologia) == 0 && curr->disponibilita == 1) {
+            if (aggiungiImpegnoAgenda(curr, codiceRichiesta, data, fasciaOraria) == 1) {
+                req->stato = Pianificata;
+                return 1;
+            }
+        }
+        curr = curr->next;
+    }
+    return 0;
+}
+
 int aggiungiImpegnoAgenda(NodoTecnico* t, int codiceRichiesta, char* data, int fasciaOraria) {
     NodoAgenda* nuovo;
     
@@ -198,6 +246,7 @@ void stampaStatoGlobale(NodoRichiesta* code[], NodoTecnico* listaT) {
     NodoRichiesta* currR;
     NodoTecnico* currT;
     NodoAgenda* currA;
+    const char* nomiStato[] = {"Aperta", "Pianificata", "InLavorazione", "Conclusa", "Annullata"};
 
     printf("\n###########################################################\n");
     printf("            REPORT COMPLETO DELLO STATO DEL SISTEMA          \n");
@@ -237,8 +286,10 @@ void stampaStatoGlobale(NodoRichiesta* code[], NodoTecnico* listaT) {
                 printf("  Appartamento: %s\n", currR->appartamento);
                 printf("  Tipologia: %s\n", currR->tipologia);
                 printf("  Descrizione: %s\n", currR->descrizione);
-                printf("  Aperta il: %s | Chiusa il: %s\n", currR->dataRichiesta, currR->dataChiusura);
-                printf("  Stato attuale: %d\n", currR->stato);
+                printf("  Aperta il: %s | Chiusa il: %s\n", currR->dataRichiesta, currR->dataChiusura);             
+                
+                printf("  Stato attuale: %s\n", nomiStato[currR->stato]);
+                
                 printf("  ---------------------------------\n");
                 currR = currR->next;
             }
