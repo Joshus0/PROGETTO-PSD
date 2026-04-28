@@ -88,4 +88,30 @@ int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codic
                     oppure -1 (fallimento: richiesta non trovata) */
 int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codiceRichiesta, char* data, int fasciaOraria);
 
+/* --- VISUALIZZAZIONE RICHIESTE FILTRATE --- */
+
+/* Post-condizione: Stampa tutte le richieste che corrispondono allo stato specificato. */
+void stampaRichiestePerStato(NodoRichiesta* code[], StatoRichiesta stato);
+
+/* Post-condizione: Stampa tutte le richieste che corrispondono alla tipologia specificata. */
+void stampaRichiestePerTipo(NodoRichiesta* code[], const char* tipo);
+
+/* Post-condizione: Stampa tutte le richieste relative a un determinato appartamento. */
+void stampaRichiestePerAppartamento(NodoRichiesta* code[], const char* appartamento);
+
+/* Post-condizione: Stampa tutte le richieste assegnate all'agenda di un determinato tecnico. */
+void stampaRichiestePerTecnico(NodoRichiesta* code[], NodoTecnico* listaT, int idTecnico);
+
+/* Post-condizione: Cerca una richiesta tramite il suo codice univoco e ne stampa i dettagli a video. */
+void stampaRichiestaPerCodice(NodoRichiesta* code[], int codice);
+
+/* --- REPORT E STATISTICHE --- */
+
+/* Post-condizione: Calcola e stampa a video tutte le statistiche del sistema 
+   (interventi aperti/chiusi, tempo medio, tecnico più attivo, aree/tipologie frequenti). */
+void generaReportStatistico(NodoRichiesta* code[], NodoTecnico* listaT);
+
+/* Post-condizione: Ritorna 1 se l'ID specificato e' gia' associato a un tecnico, 0 altrimenti. */
+int esisteTecnico(NodoTecnico* listaT, int idTecnico);
+
 #endif

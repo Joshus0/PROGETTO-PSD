@@ -38,6 +38,9 @@ int main() {
         printf("3. Prova Assegnazione Manuale (Test Conflitti)\n");
         printf("4. Assegna Richiesta a Tecnico\n");
         printf("5. Aggiorna Stato Richiesta\n");
+        printf("6. Cerca Richiesta (per Codice o Tipologia)\n");
+        printf("7. Genera Report Statistico\n");
+        printf("8. Registra Nuovo Tecnico\n");
         printf("0. Esci dal Programma\n");
         printf("Seleziona un'opzione: ");
 
@@ -81,8 +84,60 @@ int main() {
                 break;
 
             case 2:
-                /* Ora usiamo la nuova funzione che stampa TUTTO */
-                stampaStatoGlobale(codeRichieste, listaTecnici);
+                printf("\n--- MENU VISUALIZZAZIONE RICHIESTE ---\n");
+                printf("1. Stato Globale del Sistema (Tutto)\n");
+                printf("2. Filtra per Stato della richiesta\n");
+                printf("3. Filtra per Tipologia di guasto\n");
+                printf("4. Filtra per Appartamento\n");
+                printf("5. Visualizza Agenda per Tecnico\n");
+                printf("Scegli un'opzione: ");
+                
+                int subScelta;
+                scanf("%d", &subScelta);
+                pulisciBuffer();
+
+                switch (subScelta) {
+                    case 1:
+                        stampaStatoGlobale(codeRichieste, listaTecnici);
+                        break;
+                        
+                    case 2: {
+                        printf("Inserisci stato (0=Aperta, 1=Pianificata, 2=InLavorazione, 3=Conclusa, 4=Annullata): ");
+                        int st;
+                        scanf("%d", &st);
+                        pulisciBuffer();
+                        if (st >= 0 && st <= 4) {
+                            stampaRichiestePerStato(codeRichieste, (StatoRichiesta)st);
+                        } else {
+                            printf("[ERRORE] Stato non valido.\n");
+                        }
+                        break;
+                    }
+                    case 3:
+                        printf("Inserisci tipologia da cercare (es. Idraulico): ");
+                        fgets(bufferTipo, MAX_STR, stdin);
+                        bufferTipo[strcspn(bufferTipo, "\n")] = 0;
+                        stampaRichiestePerTipo(codeRichieste, bufferTipo);
+                        break;
+
+                    case 4:
+                        printf("Inserisci l'appartamento da cercare (es. Scala A): ");
+                        fgets(bufferApp, MAX_STR, stdin);
+                        bufferApp[strcspn(bufferApp, "\n")] = 0;
+                        stampaRichiestePerAppartamento(codeRichieste, bufferApp);
+                        break;
+
+                    case 5: {
+                        printf("Inserisci ID del tecnico: ");
+                        int idTec;
+                        scanf("%d", &idTec);
+                        pulisciBuffer();
+                        stampaRichiestePerTecnico(codeRichieste, listaTecnici, idTec);
+                        break;
+                    }
+                    default:
+                        printf("\n[ERRORE] Opzione di visualizzazione non valida.\n");
+                }
                 break;
 
             case 3:
@@ -179,6 +234,76 @@ int main() {
                 printf("\n[OK] Stato aggiornato con successo.\n");
                 break;
                 }
+
+            case 6:
+                printf("\n--- RICERCA RICHIESTE ---\n");
+                printf("1. Cerca per Codice Univoco\n");
+                printf("2. Cerca per Tipologia di Guasto\n");
+                printf("Scegli un'opzione: ");
+                
+                int sceltaRicerca;
+                scanf("%d", &sceltaRicerca);
+                pulisciBuffer();
+
+                if (sceltaRicerca == 1) {
+                    printf("Inserisci il codice della richiesta da cercare: ");
+                    int codRicerca;
+                    scanf("%d", &codRicerca);
+                    pulisciBuffer();
+                    
+                    /* Richiama la nuova funzione che gestisce la stampa nascondendo i dati */
+                    stampaRichiestaPerCodice(codeRichieste, codRicerca);
+                    
+                } else if (sceltaRicerca == 2) {
+                    printf("Inserisci la tipologia da cercare (es. Idraulico): ");
+                    fgets(bufferTipo, MAX_STR, stdin);
+                    bufferTipo[strcspn(bufferTipo, "\n")] = 0;
+                    
+                    /* Ricicliamo la funzione creata per le visualizzazioni */
+                    stampaRichiestePerTipo(codeRichieste, bufferTipo);
+                    
+                } else {
+                    printf("\n[ERRORE] Opzione di ricerca non valida.\n");
+                }
+                break;
+            
+            case 7:
+                printf("\nGenerazione del report in corso...\n");
+                generaReportStatistico(codeRichieste, listaTecnici);
+                break;
+
+            case 8:
+                printf("\n-- REGISTRAZIONE NUOVO TECNICO --\n");
+                
+                /* Dichiariamo le variabili necessarie in questo blocco */
+                int nuovoId;
+                char bufferNome[MAX_STR];
+                char bufferSpec[MAX_STR];
+
+                printf("Inserisci un ID univoco per il tecnico (numero intero): ");
+                scanf("%d", &nuovoId);
+                pulisciBuffer();
+
+               /* --- NUOVO CONTROLLO UNICITA' ID --- */
+                if (esisteTecnico(listaTecnici, nuovoId) == 1) {
+                    printf("\n[ERRORE] Operazione annullata. Esiste gia' un tecnico registrato con l'ID %d.\n", nuovoId);
+                    break; /* Esce dallo switch e torna al menu principale */
+                }
+                
+                printf("Inserisci Nome e Cognome: ");
+                fgets(bufferNome, MAX_STR, stdin);
+                bufferNome[strcspn(bufferNome, "\n")] = 0;
+
+                printf("Inserisci Specializzazione (es. Idraulico, Elettricista): ");
+                fgets(bufferSpec, MAX_STR, stdin);
+                bufferSpec[strcspn(bufferSpec, "\n")] = 0;
+
+                /* Passiamo i dati al modulo interventi.c che si occuperà di creare la struttura */
+                inserisciTecnico(&listaTecnici, nuovoId, bufferNome, bufferSpec);
+
+                printf("\n[OK] Tecnico '%s' (Specializzazione: %s) registrato con successo con ID %d!\n", 
+                       bufferNome, bufferSpec, nuovoId);
+                break;
 
             case 0:
                 printf("Uscita in corso... Arrivederci!\n");

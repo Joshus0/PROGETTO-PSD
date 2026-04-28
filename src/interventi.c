@@ -62,6 +62,17 @@ static int dataValida(const char* data) {
     return 1;
 }
 
+static void stampaSingolaRichiesta(NodoRichiesta* req) {
+    const char* nomiStato[] = {"Aperta", "Pianificata", "InLavorazione", "Conclusa", "Annullata"};
+    printf("  [CODICE UNICO: %d]\n", req->codiceRichiesta);
+    printf("  Appartamento: %s\n", req->appartamento);
+    printf("  Tipologia: %s\n", req->tipologia);
+    printf("  Descrizione: %s\n", req->descrizione);
+    printf("  Urgenza: %d | Stato: %s\n", req->urgenza, nomiStato[req->stato]);
+    printf("  Aperta il: %s | Chiusa il: %s\n", req->dataRichiesta, req->dataChiusura);
+    printf("  ---------------------------------\n");
+}
+
 //-------------------------------------------------------------------------------------//
 
 //? Inizializza a NULL:
@@ -186,6 +197,20 @@ void setDataChiusura(NodoRichiesta* req, char* data) {
 
     strcpy(req->dataChiusura, data);          /* 3. arriva qui SOLO se tutto ok */
 }
+
+int esisteTecnico(NodoTecnico* listaT, int idTecnico) {
+    NodoTecnico* curr = listaT;
+    
+    while (curr != NULL) {
+        if (curr->idTecnico == idTecnico) {
+            return 1; /* Errore: ID già esistente */
+        }
+        curr = curr->next;
+    }
+    
+    return 0; /* OK: l'ID è libero */
+}
+
 //------------------------------------------------------------------------------------
 
 //Cerca una richiesta per codice analizzando ogni livello di urgenza
@@ -384,4 +409,219 @@ void stampaStatoGlobale(NodoRichiesta* code[], NodoTecnico* listaT) {
         }
     }
     printf("###########################################################\n\n");
+}
+
+void stampaRichiestePerStato(NodoRichiesta* code[], StatoRichiesta stato) {
+    int i, trovate = 0;
+    const char* nomiStato[] = {"Aperta", "Pianificata", "InLavorazione", "Conclusa", "Annullata"};
+    
+    printf("\n--- RICHIESTE CON STATO: %s ---\n", nomiStato[stato]);
+    for (i = LIVELLI_URGENZA - 1; i >= 0; i--) { /* Partiamo sempre dalle più urgenti */
+        NodoRichiesta* curr = code[i];
+        while (curr != NULL) {
+            if (curr->stato == stato) {
+                stampaSingolaRichiesta(curr);
+                trovate++;
+            }
+            curr = curr->next;
+        }
+    }
+    if (trovate == 0) printf("Nessuna richiesta trovata per questo stato.\n");
+}
+
+void stampaRichiestePerTipo(NodoRichiesta* code[], const char* tipo) {
+    int i, trovate = 0;
+    printf("\n--- RICHIESTE DI TIPO: %s ---\n", tipo);
+    for (i = LIVELLI_URGENZA - 1; i >= 0; i--) {
+        NodoRichiesta* curr = code[i];
+        while (curr != NULL) {
+            if (strcmp(curr->tipologia, tipo) == 0) {
+                stampaSingolaRichiesta(curr);
+                trovate++;
+            }
+            curr = curr->next;
+        }
+    }
+    if (trovate == 0) printf("Nessuna richiesta trovata per questa tipologia.\n");
+}
+
+void stampaRichiestePerAppartamento(NodoRichiesta* code[], const char* appartamento) {
+    int i, trovate = 0;
+    printf("\n--- RICHIESTE PER APPARTAMENTO: %s ---\n", appartamento);
+    for (i = LIVELLI_URGENZA - 1; i >= 0; i--) {
+        NodoRichiesta* curr = code[i];
+        while (curr != NULL) {
+            if (strcmp(curr->appartamento, appartamento) == 0) {
+                stampaSingolaRichiesta(curr);
+                trovate++;
+            }
+            curr = curr->next;
+        }
+    }
+    if (trovate == 0) printf("Nessuna richiesta trovata per questo appartamento.\n");
+}
+
+void stampaRichiestePerTecnico(NodoRichiesta* code[], NodoTecnico* listaT, int idTecnico) {
+    NodoTecnico* currT = listaT;
+    
+    /* 1. Troviamo il tecnico per verificare che esista */
+    while (currT != NULL) {
+        if (currT->idTecnico == idTecnico) break;
+        currT = currT->next;
+    }
+
+    if (currT == NULL) {
+        printf("\n[ERRORE] Tecnico con ID %d non trovato nel database.\n", idTecnico);
+        return;
+    }
+
+    /* 2. Scorriamo la sua agenda personale */
+    printf("\n--- RICHIESTE ASSEGNATE AL TECNICO: %s (ID: %d) ---\n", currT->nome, currT->idTecnico);
+    NodoAgenda* currA = currT->agenda;
+    int trovate = 0;
+
+    while (currA != NULL) {
+        /* Usiamo la funzione già esistente per recuperare l'intero nodo della richiesta */
+        NodoRichiesta* req = trovaRichiestaPerCodice(code, currA->codiceRichiesta);
+        if (req != NULL) {
+            printf("  [INTERVENTO PIANIFICATO IL: %s - Fascia Oraria: %d]\n", currA->data, currA->fasciaOraria);
+            stampaSingolaRichiesta(req);
+            trovate++;
+        }
+        currA = currA->next;
+    }
+
+    if (trovate == 0) printf("Nessun intervento programmato per questo tecnico al momento.\n");
+}
+
+void stampaRichiestaPerCodice(NodoRichiesta* code[], int codice) {
+    NodoRichiesta* req = trovaRichiestaPerCodice(code, codice);
+    
+    if (req != NULL) {
+        printf("\n--- RISULTATO RICERCA PER CODICE: %d ---\n", codice);
+        stampaSingolaRichiesta(req);
+    } else {
+        printf("\n[ERRORE] Nessuna richiesta trovata con il codice %d.\n", codice);
+    }
+}
+
+static int calcolaGiorniAssoluti(const char* data) {
+    int g, m, a;
+    if (sscanf(data, "%d/%d/%d", &g, &m, &a) != 3) return 0;
+    
+    if (m < 3) {
+        a--;
+        m += 12;
+    }
+    return 365 * a + a / 4 - a / 100 + a / 400 + (153 * m - 457) / 5 + g - 306;
+}
+
+/* Funzione privata di supporto per aggiornare i contatori delle stringhe (Aree e Tipologie) */
+static void aggiornaFrequenza(char chiavi[][MAX_STR], int conteggi[], int* numChiavi, const char* nuovaChiave) {
+    int i;
+    for (i = 0; i < *numChiavi; i++) {
+        if (strcmp(chiavi[i], nuovaChiave) == 0) {
+            conteggi[i]++;
+            return;
+        }
+    }
+    if (*numChiavi < 100) { /* Limite massimo di voci distinte tracciabili */
+        strcpy(chiavi[*numChiavi], nuovaChiave);
+        conteggi[*numChiavi] = 1;
+        (*numChiavi)++;
+    }
+}
+
+void generaReportStatistico(NodoRichiesta* code[], NodoTecnico* listaT) {
+    int i;
+    int totAperte = 0, totChiuse = 0, totAltre = 0;
+    int sommaGiorniCompletamento = 0;
+    
+    /* Variabili per la ricerca del tecnico più attivo */
+    NodoTecnico* currT = listaT;
+    NodoTecnico* tecnicoMax = NULL;
+    int maxCarico = -1;
+
+    /* Array per tracciare le frequenze di Tipologie e Aree (fino a 100 distinte) */
+    char tipi[100][MAX_STR];
+    int conteggiTipi[100] = {0};
+    int numTipi = 0;
+
+    char aree[100][MAX_STR];
+    int conteggiAree[100] = {0};
+    int numAree = 0;
+
+    /* --- 1. ANALISI DELLE RICHIESTE --- */
+    for (i = LIVELLI_URGENZA - 1; i >= 0; i--) {
+        NodoRichiesta* currR = code[i];
+        while (currR != NULL) {
+            /* Conteggio per stato */
+            if (currR->stato == Aperta) totAperte++;
+            else if (currR->stato == Conclusa) {
+                totChiuse++;
+                /* Calcolo tempo di completamento */
+                int giorniApertura = calcolaGiorniAssoluti(currR->dataRichiesta);
+                int giorniChiusura = calcolaGiorniAssoluti(currR->dataChiusura);
+                if (giorniApertura > 0 && giorniChiusura > 0) {
+                    sommaGiorniCompletamento += (giorniChiusura - giorniApertura);
+                }
+            }
+            else totAltre++;
+
+            /* Aggiornamento frequenze per Tipologia e Area */
+            aggiornaFrequenza(tipi, conteggiTipi, &numTipi, currR->tipologia);
+            aggiornaFrequenza(aree, conteggiAree, &numAree, currR->appartamento);
+
+            currR = currR->next;
+        }
+    }
+
+    /* --- 2. ANALISI DEI TECNICI --- */
+    while (currT != NULL) {
+        if (currT->caricoLavoro > maxCarico) {
+            maxCarico = currT->caricoLavoro;
+            tecnicoMax = currT;
+        }
+        currT = currT->next;
+    }
+
+    /* --- 3. STAMPA DEL REPORT --- */
+    printf("\n=========================================\n");
+    printf("        REPORT STATISTICO DI SISTEMA       \n");
+    printf("=========================================\n");
+
+    printf("\n[STATISTICHE STATO RICHIESTE]\n");
+    printf(" - Nuove Richieste (Aperte): %d\n", totAperte);
+    printf(" - Interventi Conclusi:      %d\n", totChiuse);
+    printf(" - In altra fase lavorativa: %d\n", totAltre);
+
+    if (totChiuse > 0) {
+        float tempoMedio = (float)sommaGiorniCompletamento / totChiuse;
+        printf(" - Tempo medio completamento: %.2f giorni\n", tempoMedio);
+    } else {
+        printf(" - Tempo medio completamento: N/A (nessun intervento chiuso)\n");
+    }
+
+    printf("\n[STATISTICHE OPERATIVE]\n");
+    if (tecnicoMax != NULL && maxCarico > 0) {
+        printf(" - Tecnico piu' attivo: %s (ID: %d) con %d interventi.\n", 
+               tecnicoMax->nome, tecnicoMax->idTecnico, maxCarico);
+    } else {
+        printf(" - Nessun tecnico ha ancora incarichi assegnati.\n");
+    }
+
+    printf("\n[AREE CON PIU' PROBLEMI]\n");
+    for (i = 0; i < numAree; i++) {
+        if (conteggiAree[i] > 0) { /* Potremmo anche ordinare l'array, ma mostriamo i conteggi principali */
+            printf(" - %s: %d problemi segnalati\n", aree[i], conteggiAree[i]);
+        }
+    }
+
+    printf("\n[INTERVENTI PER TIPOLOGIA]\n");
+    for (i = 0; i < numTipi; i++) {
+        if (conteggiTipi[i] > 0) {
+            printf(" - %s: %d richieste\n", tipi[i], conteggiTipi[i]);
+        }
+    }
+    printf("=========================================\n\n");
 }
