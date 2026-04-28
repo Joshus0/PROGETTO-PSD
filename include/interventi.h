@@ -70,4 +70,6 @@ int aggiungiImpegnoAgenda(NodoTecnico* t, int codiceRichiesta, char* data, int f
 /* Post-condizione: Stampa a video l'intero contenuto della memoria, evidenziando ID unici e relazioni. */
 void stampaStatoGlobale(NodoRichiesta* code[], NodoTecnico* listaT);
 
+/* Post-condizione: Ritorna il puntatore al NodoRichiesta con il codice specificato, o NULL se non esiste */
+NodoRichiesta* trovaRichiestaPerCodice(NodoRichiesta* code[], int codice);
 #endif
