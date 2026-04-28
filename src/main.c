@@ -116,23 +116,31 @@ int main() {
                 printf("\n-- ASSEGNAZIONE RICHIESTA --\n");
                 printf("Codice richiesta da assegnare: ");
                 {
-                int codiceReq;
-                scanf("%d", &codiceReq);
-                pulisciBuffer();
+                    int codiceReq;
+                    scanf("%d", &codiceReq);
+                    pulisciBuffer();
 
-                printf("Data intervento (DD/MM/YYYY): ");
-                fgets(bufferData, 11, stdin);
-                bufferData[strcspn(bufferData, "\n")] = 0;
+                    printf("Data intervento (DD/MM/YYYY): ");
+                    fgets(bufferData, 11, stdin);
+                    bufferData[strcspn(bufferData, "\n")] = 0;
 
-                printf("Fascia oraria (1=Mattina, 2=Pomeriggio, 3=Sera): ");
-                scanf("%d", &fascia);
-                pulisciBuffer();
+                    printf("Fascia oraria (1=Mattina, 2=Pomeriggio, 3=Sera): ");
+                    scanf("%d", &fascia);
+                    pulisciBuffer();
 
-                if (assegnaRichiesta(codeRichieste, listaTecnici, codiceReq, bufferData, fascia) == 1) {
-                    printf("\n[OK] Tecnico compatibile trovato e intervento pianificato.\n");
-                } else {
-                    printf("\n[ERRORE] Nessun tecnico compatibile disponibile o conflitto orario.\n");
-                }
+                    /* Il main non accede ai dati, passa i puntatori opachi alla funzione del modulo */
+                    int idAssegnato = assegnaRichiesta(codeRichieste, listaTecnici, codiceReq, bufferData, fascia);
+
+                    if (idAssegnato > 0) 
+                    {
+                        printf("\n[OK] Tecnico compatibile trovato! Intervento pianificato al Tecnico ID: %d.\n", idAssegnato);
+                    } else if (idAssegnato == 0) 
+                    {
+                        printf("\n[ERRORE] Nessun tecnico compatibile disponibile o conflitto orario per tutti i tecnici adatti.\n");
+                    } else 
+                    {
+                        printf("\n[ERRORE] Il codice richiesta inserito non e' stato trovato nel sistema.\n");
+                    }
                 break;
                 }
 

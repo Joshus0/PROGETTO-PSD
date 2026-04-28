@@ -82,5 +82,10 @@ void setDataChiusura(NodoRichiesta* req, char* data);
                     oppure 0 (fallimento: richiesta non trovata, nessun tecnico compatibile/disponibile, conflitto) */
 int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codiceRichiesta, char* data, int fasciaOraria);
 
-#endif
+/* Assegna automaticamente un tecnico compatibile a una richiesta scegliendo quello con meno carico */
+/* Post-condizione: Output = ID del tecnico assegnato (successo: stato -> Pianificata)
+                    oppure 0 (fallimento: nessun tecnico compatibile/disponibile) 
+                    oppure -1 (fallimento: richiesta non trovata) */
+int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codiceRichiesta, char* data, int fasciaOraria);
 
+#endif

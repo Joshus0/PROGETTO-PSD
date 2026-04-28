@@ -234,6 +234,8 @@ int verificaConflitto(NodoTecnico* t, char* data, int fasciaOraria) {
     return 0; 
 }
 
+/*
+SOSTITUIBILE CON QUELLA DI SOTTO
 int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codiceRichiesta, char* data, int fasciaOraria) {
     NodoRichiesta* req;
     NodoTecnico* curr;
@@ -241,7 +243,7 @@ int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codic
     req = trovaRichiestaPerCodice(code, codiceRichiesta);
     if (req == NULL) return 0;
 
-    /* Scorriamo i tecnici cercando uno compatibile e disponibile */
+     Scorriamo i tecnici cercando uno compatibile e disponibile 
     curr = listaTecnici;
     while (curr != NULL) {
         if (strcmp(curr->specializzazione, req->tipologia) == 0 && curr->disponibilita == 1) {
@@ -253,6 +255,46 @@ int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codic
         curr = curr->next;
     }
     return 0;
+}
+*/
+
+int assegnaRichiesta(NodoRichiesta* code[], NodoTecnico* listaTecnici, int codiceRichiesta, char* data, int fasciaOraria) {
+    NodoRichiesta* req;
+    NodoTecnico* curr;
+    NodoTecnico* scelto = NULL;
+    int minCarico = -1; /* Inizializziamo a -1 per capire quando troviamo il primo valido */
+
+    req = trovaRichiestaPerCodice(code, codiceRichiesta);
+    if (req == NULL) return -1; /* Ritorna -1 se il codice richiesta non esiste */
+
+    /* Scorriamo i tecnici cercando quello compatibile, disponibile e col minor carico */
+    curr = listaTecnici;
+    while (curr != NULL) {
+        /* 1. Compatibilità specializzazione e disponibilità base */
+        if (strcmp(curr->specializzazione, req->tipologia) == 0 && curr->disponibilita == 1) {
+            
+            /* 2. Verifica che non abbia già impegni a quell'ora in quel giorno */
+            if (verificaConflitto(curr, data, fasciaOraria) == 0) {
+                
+                /* 3. Trova quello con il carico di lavoro minore */
+                if (scelto == NULL || curr->caricoLavoro < minCarico) {
+                    scelto = curr;
+                    minCarico = curr->caricoLavoro;
+                }
+            }
+        }
+        curr = curr->next;
+    }
+
+    /* Se abbiamo trovato il candidato ideale */
+    if (scelto != NULL) {
+        if (aggiungiImpegnoAgenda(scelto, codiceRichiesta, data, fasciaOraria) == 1) {
+            setStatoRichiesta(req, Pianificata); /* Usiamo il Setter per rispettare l'incapsulamento logico */
+            return scelto->idTecnico;
+        }
+    }
+    
+    return 0; /* Nessun tecnico trovato o assegnazione fallita */
 }
 
 int aggiungiImpegnoAgenda(NodoTecnico* t, int codiceRichiesta, char* data, int fasciaOraria) {
