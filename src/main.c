@@ -5,6 +5,7 @@
 #include "../include/interventi.h"
 #include "../include/gestione_file.h"
 
+/* ? Funzione per pulire lo stream di input ed evitare letture errate nei cicli */
 void pulisciBuffer() {
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
@@ -15,30 +16,33 @@ int main() {
     NodoTecnico* listaTecnici;
     int scelta = -1;
 
-    /* Dati temporanei per gli input */
+    /* ? Variabili temporanee per catturare gli input dell'utente tramite menu */
     char bufferApp[MAX_STR], bufferTipo[MAX_STR], bufferDesc[255], bufferData[11];
     int urgenza, fascia;
 
+    /* ? Setup iniziale delle strutture dati */
     inizializzaSistema(codeRichieste, &listaTecnici);
 
     printf("=========================================\n");
     printf("  SISTEMA GESTIONE MANUTENZIONE CONDOMINIO \n");
     printf("=========================================\n");
 
-    /* Caricamento iniziale dai file */
+    /* ? Importazione dei database esterni */
     printf("Caricamento database...\n");
     caricaTecniciDaFile("tests/tecnici.txt", &listaTecnici);
     caricaRichiesteDaFile("tests/richieste.txt", codeRichieste);
     printf("Database caricato con successo.\n");
 
+    /* * CICLO DI INTERFACCIA UTENTE (CLI) */
     while (scelta != 0) {
         printf("\n--- MENU PRINCIPALE ---\n");
         printf("1. Inserisci Nuova Richiesta\n");
-        printf("2. Visualizza Dati in Memoria (Test Lettura)\n");
+        printf("2. Visualizza Stato Globale (Report Completo)\n");
         printf("3. Prova Assegnazione Manuale (Test Conflitti)\n");
         printf("0. Esci dal Programma\n");
         printf("Seleziona un'opzione: ");
 
+        /* ? Controllo validita' input numerico per la scelta del menu */
         if (scanf("%d", &scelta) != 1) {
             printf("Errore: Inserisci un numero valido.\n");
             pulisciBuffer();
@@ -48,10 +52,11 @@ int main() {
 
         switch (scelta) {
             case 1:
+                /* * INSERIMENTO MANUALE RICHIESTA */
                 printf("\n-- INSERIMENTO RICHIESTA --\n");
                 printf("Appartamento (es. Scala A): ");
                 fgets(bufferApp, MAX_STR, stdin);
-                bufferApp[strcspn(bufferApp, "\n")] = 0;
+                bufferApp[strcspn(bufferApp, "\n")] = 0; /* Rimuove il newline */
 
                 printf("Tipologia (es. Idraulico): ");
                 fgets(bufferTipo, MAX_STR, stdin);
@@ -69,6 +74,7 @@ int main() {
                 scanf("%d", &urgenza);
                 pulisciBuffer();
 
+                /* ? Validazione dell'indice di urgenza prima dell'inserimento */
                 if (urgenza >= 0 && urgenza < LIVELLI_URGENZA) {
                     inserisciRichiesta(codeRichieste, urgenza, bufferApp, bufferTipo, bufferDesc, bufferData);
                     printf("\n[OK] Richiesta inserita con successo nel secchiello %d!\n", urgenza);
@@ -78,33 +84,34 @@ int main() {
                 break;
 
             case 2:
-                /* Ora usiamo la nuova funzione che stampa TUTTO */
+                /* * VISUALIZZAZIONE COMPLETA DELLA MEMORIA DINAMICA */
+                /* ? Richiama la funzione di diagnostica per stampare tecnici, agende e richieste */
                 stampaStatoGlobale(codeRichieste, listaTecnici);
                 break;
 
             case 3:
-                /* Test manuale per l'algoritmo dei conflitti */
+                /* * MODULO DI TEST PER LA LOGICA DEI CONFLITTI */
                 if (listaTecnici == NULL) {
-                    printf("\n[ERRORE] Nessun tecnico caricato. Assicurati che tecnici.txt esista.\n");
+                    printf("\n[ERRORE] Nessun tecnico caricato. Controlla il file tecnici.txt\n");
                     break;
                 }
                 printf("\n-- TEST ASSEGNAZIONE E CONFLITTI --\n");
-                printf("Proviamo ad assegnare un lavoro al tecnico in testa: %s\n", getNomeTecnico(listaTecnici));
+                printf("Utilizzo tecnico in testa: %s\n", getNomeTecnico(listaTecnici));
                 
                 printf("Inserisci Data (es. 10/10/2026): ");
                 fgets(bufferData, 11, stdin);
                 bufferData[strcspn(bufferData, "\n")] = 0;
                 
-                printf("Inserisci Fascia Oraria (1=Mattina, 2=Pomeriggio, 3=Sera): ");
+                printf("Fascia Oraria (1=Mattina, 2=Pomeriggio, 3=Sera): ");
                 scanf("%d", &fascia);
                 pulisciBuffer();
 
-                /* Chiamiamo la tua funzione che incapsula anche verificaConflitto */
+                /* ? Verifica se il tecnico e' libero chiamando la logica di gestione agenda */
                 if (aggiungiImpegnoAgenda(listaTecnici, 999, bufferData, fascia) == 1) {
                     printf("\n[SUCCESSO] Impegno registrato! Il tecnico e' libero.\n");
-                    printf("Il suo carico di lavoro ora e': %d\n", getCaricoLavoro(listaTecnici));
+                    printf("Carico di lavoro aggiornato: %d\n", getCaricoLavoro(listaTecnici));
                 } else {
-                    printf("\n[BLOCCATO] Conflitto rilevato! Il tecnico e' gia' occupato in quella data e fascia oraria.\n");
+                    printf("\n[BLOCCATO] Conflitto rilevato! Tecnico occupato in questa data/fascia.\n");
                 }
                 break;
 
