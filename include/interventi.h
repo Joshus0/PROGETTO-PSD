@@ -21,9 +21,8 @@ void inizializzaSistema(NodoRichiesta* code[], NodoTecnico** listaT);
 
 
 /* --- FUNZIONI RICHIESTE --- */
-
-/* Post-condizione: Nuova richiesta allocata in testa all'array code[urgenza]. Stato iniziale impostato su 'Aperta'. */
-void inserisciRichiesta(NodoRichiesta* code[], int urgenza, char* app, char* tipo, char* desc, char* data);
+/* Post-condizione: Output = 1 (successo) oppure 0 (data non valida o malloc fallita) */
+int inserisciRichiesta(NodoRichiesta* code[], int urgenza, char* app, char* tipo, char* desc, char* data);
 
 /* Post-condizione: Output = intero univoco della richiesta (o -1 se req è NULL). */
 int getCodiceRichiesta(NodoRichiesta* req);

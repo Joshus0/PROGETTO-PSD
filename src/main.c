@@ -72,8 +72,9 @@ int main() {
                 pulisciBuffer();
 
                 if (urgenza >= 0 && urgenza < LIVELLI_URGENZA) {
-                    inserisciRichiesta(codeRichieste, urgenza, bufferApp, bufferTipo, bufferDesc, bufferData);
-                    printf("\n[OK] Richiesta inserita con successo nel secchiello %d!\n", urgenza);
+                    if (inserisciRichiesta(codeRichieste, urgenza, bufferApp, bufferTipo, bufferDesc, bufferData) == 1) {
+                        printf("\n[OK] Richiesta inserita con successo!\n");
+                    }
                 } else {
                     printf("\n[ERRORE] Livello urgenza non valido.\n");
                 }

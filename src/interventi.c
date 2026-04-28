@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 //*ADT del progetto
 //-------------------------------------------------------------------------------------//
@@ -34,6 +35,33 @@ struct NodoRichiesta {          //? Singolo Ticket di guasto
     StatoRichiesta stato;
     struct NodoRichiesta* next;
 };
+
+static int dataValida(const char* data) {
+    int giorno, mese, anno;
+    int giorniPerMese[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+
+    if (strlen(data) != 10) return 0;
+    if (data[2] != '/' || data[5] != '/') return 0;
+
+    if (!isdigit((unsigned char)data[0]) || !isdigit((unsigned char)data[1])) return 0;
+    if (!isdigit((unsigned char)data[3]) || !isdigit((unsigned char)data[4])) return 0;
+    if (!isdigit((unsigned char)data[6]) || !isdigit((unsigned char)data[7])) return 0;
+    if (!isdigit((unsigned char)data[8]) || !isdigit((unsigned char)data[9])) return 0;
+
+    giorno = (data[0]-'0')*10 + (data[1]-'0');
+    mese   = (data[3]-'0')*10 + (data[4]-'0');
+    anno   = (data[6]-'0')*1000 + (data[7]-'0')*100 + (data[8]-'0')*10 + (data[9]-'0');
+
+    if (mese < 1 || mese > 12) return 0;
+
+    if ((anno % 4 == 0 && anno % 100 != 0) || (anno % 400 == 0))
+        giorniPerMese[1] = 29;
+
+    if (giorno < 1 || giorno > giorniPerMese[mese - 1]) return 0;
+
+    return 1;
+}
+
 //-------------------------------------------------------------------------------------//
 
 //? Inizializza a NULL:
@@ -50,12 +78,18 @@ void inizializzaSistema(NodoRichiesta* code[], NodoTecnico** listaT) {
 
 //?Inserisce una richiesta ordinata per urgenza
 
-void inserisciRichiesta(NodoRichiesta* code[], int urgenza, char* app, char* tipo, char* desc, char* data) {
+int inserisciRichiesta(NodoRichiesta* code[], int urgenza, char* app, char* tipo, char* desc, char* data) {
 
     static int counterRichieste = 1; //Salviamo questo valore per avere codici richiesta sempre differenti
     
-    NodoRichiesta* nuovo = (NodoRichiesta*)malloc(sizeof(NodoRichiesta));
-    
+   NodoRichiesta* nuovo;
+
+    if (!dataValida(data)) {
+        printf("[ERRORE] La data non e' valida.\n");
+        return 0;
+    }
+
+    nuovo = (NodoRichiesta*)malloc(sizeof(NodoRichiesta));
     if (nuovo != NULL) {
         nuovo->codiceRichiesta = counterRichieste++;
         strcpy(nuovo->appartamento, app);
@@ -68,7 +102,9 @@ void inserisciRichiesta(NodoRichiesta* code[], int urgenza, char* app, char* tip
         
         nuovo->next = code[urgenza];//Il "next" della nuova richiesta punterà all'elemento in testa all'array di rispettiva urgenza
         code[urgenza] = nuovo;//La nuova richiesta viene messa in testa all'array
+        return 1;
     }
+    return 0;
 }
 
 void inserisciTecnico(NodoTecnico** testa, int id, char* nome, char* spec) {//Doppio puntatore al NodoTecnico per prendere l'indirizzo dell'elemento in testa
@@ -141,9 +177,14 @@ NodoTecnico* getNextTecnico(NodoTecnico* t) {
 }
 
 void setDataChiusura(NodoRichiesta* req, char* data) {
-    if (req != NULL && data != NULL) {
-        strcpy(req->dataChiusura, data);
+    if (req == NULL || data == NULL) return;  /* 1. controllo puntatori NULL */
+
+    if (!dataValida(data)) {                  /* 2. controllo data */
+        printf("[ERRORE] La data non e' valida.\n");
+        return;
     }
+
+    strcpy(req->dataChiusura, data);          /* 3. arriva qui SOLO se tutto ok */
 }
 //------------------------------------------------------------------------------------
 
@@ -218,6 +259,11 @@ int aggiungiImpegnoAgenda(NodoTecnico* t, int codiceRichiesta, char* data, int f
     NodoAgenda* nuovo;
     
     if (t == NULL) return 0;
+
+    if (!dataValida(data)) {
+        printf("[ERRORE] La data non e' valida.\n");
+        return 0;
+    }
 
     if (verificaConflitto(t, data, fasciaOraria) == 1) {
         return 0; 
