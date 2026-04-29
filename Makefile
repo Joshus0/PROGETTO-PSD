@@ -6,6 +6,7 @@ CFLAGS = -std=c99 -Wall -Wextra -Iinclude
 ifeq ($(OS),Windows_NT)
     TARGET = condominio.exe
     TEST_TARGET = test_condominio.exe
+	TEST_SRC = tests/main_test.c
     CLEAN_CMD = powershell -Command "Remove-Item -Force *.exe -ErrorAction Ignore"
 else
 	TARGET = condominio
